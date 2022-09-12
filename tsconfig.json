@@ -1,12 +1,17 @@
 {
   "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
     "target": "es6",
     "allowJs": false,
     "strict": true,
     "outDir": "./dist",
     "sourceMap": false,
     "esModuleInterop": true,
-    "removeComments": true
+    "removeComments": true,
+    "types": [
+      "node"
+    ]
   },
   "include": ["src"]
 }

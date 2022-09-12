@@ -1,0 +1,12 @@
+version: "3.8"
+services:
+  auth-test:
+    build: .
+    ports:
+      - "7060:7060"
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    env_file:
+      - ./.env
+    

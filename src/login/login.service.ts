@@ -1,8 +1,13 @@
+import userModel from "../models/user.model";
+
 export default class LoginService {
-    createUser() {
-        return {
-            name: 'John Doe'
-        };
+
+    async createUser(login: string, password: string) {
+        return await userModel.create(login, password);
+    }
+
+    async findByLogin(login: string) {
+        return await userModel.findByLogin(login);
     }
 
 }

@@ -1,4 +1,5 @@
 import client from "../db/pg";
+import { User } from "../interfaces/user.interface";
 
 class UserModel {
     constructor() {
@@ -11,18 +12,33 @@ class UserModel {
         `)
     }
 
-    async create(login: string, password: string) {
-        const {rows: [row]} = await client.query(`INSERT INTO users (login, password) VALUES ('${login}', '${password}') RETURNING *`);
+    async create(login: string, password: string): Promise<User> {
+        const query = {
+            text: 'INSERT INTO users (login, password) VALUES ($1, $2) RETURNING *',
+            values: [login, password],
+        };
+
+        const {rows: [row]} = await client.query(query);
 
         return row;
     }
 
-    async findById(id: string) {
-        return client.query(`SELECT * FROM users WHERE id = '${id}'`);
+    async findById(id: string): Promise<User> {
+        const query = {
+            text: `SELECT * FROM users WHERE id = $1`,
+            values: [id],
+        };
+
+        return client.query(query);
     }
 
-    async findByLogin(login: string) {
-        const {rows: [row]} = await client.query(`SELECT * FROM users WHERE login = '${login}'`);
+    async findByLogin(login: string): Promise<User> {
+        const query = {
+            text: `SELECT * FROM users WHERE login = $1`,
+            values: [login],
+        };
+
+        const {rows: [row]} = await client.query(query);
 
         return row;
     }

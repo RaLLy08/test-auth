@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
-import { pathOr, split } from "ramda";
+import { verify } from "jsonwebtoken";
+import { pathOr, split, prop } from "ramda";
+import JwtTokenService from "./jwt-token.service";
 
 
-const jwtMiddleware = () =>
+export const accessTokenMiddleware = () =>
     (req: Request, res: Response, next: NextFunction) => {
         if (req.method === "OPTIONS") next();
         
@@ -17,7 +18,9 @@ const jwtMiddleware = () =>
         }
 
         try {
-            jwt.verify(token, process.env.JWT_SECRET!);
+            verify(token, process.env.JWT_SECRET!);
+
+            next();
         } catch (error: any) {
             if (error.name === "TokenExpiredError") {
                 return res.status(403).json({message: "Token is expired", error});
@@ -27,4 +30,25 @@ const jwtMiddleware = () =>
         }
     };
 
-export default jwtMiddleware;
+
+export const refreshTokenMiddleware = () =>
+    (req: Request, res: Response, next: NextFunction) => {
+        if (req.method === "OPTIONS") next();
+
+        const refreshToken: string = prop(JwtTokenService.COOKIE_REFRESH_TOKEN)(req.cookies);
+
+        try {
+            verify(refreshToken, process.env.JWT_SECRET!);
+
+            next();
+        } catch (error: any) {
+            if (error.name === "TokenExpiredError") {
+                return res.status(403).json({message: "Token is expired", error});
+            }
+
+            return res.status(400).json({message: "User is not authorized", error});
+        }
+        
+    };
+
+

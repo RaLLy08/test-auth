@@ -1,5 +1,7 @@
 import Joi from "joi";
 
+import JwtTokenService from "../auth/jwt-token.service";
+
 export const signupSchema = Joi.object({
     login: Joi.string()
         .alphanum()

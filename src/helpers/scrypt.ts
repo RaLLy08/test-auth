@@ -1,6 +1,5 @@
 import { scrypt, randomBytes } from 'crypto';
-
-type Hash = `${string}:${string}`
+import { Hash } from '../interfaces/user.interface';
 
 const scryptAsync = (key: string, salt: string): Promise<string> => new Promise((res, rej) => {
     scrypt(key, salt, 32, (err, derivedKey) => {

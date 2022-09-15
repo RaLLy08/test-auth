@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { prop } from 'ramda';
 
 import LoginService from "./login.service";
 import { makeHash, verifyPassword } from './../helpers/scrypt';
@@ -20,15 +21,14 @@ export default class LoginController {
 
         if (!isValidPassword) return res.status(400).json({ message: 'Invalid login or password' });
         
-        const accessToken = this.jwtTokenService.makeAccessToken(user);
-        const refreshToken = await this.jwtTokenService.makeRefreshToken(user, deviceFingerprint, ip);
+        const accessToken = JwtTokenService.makeAccessToken(user);
+        const refreshToken = JwtTokenService.makeRefreshToken(user.login);
 
-        res.cookie("refresh-token", refreshToken, {
-            maxAge: +process.env.JWT_REFRESH_TOKEN_EXPIRES_IN_SEC! * 1000,
-            httpOnly: true,
-        });
+        await this.jwtTokenService.setRefreshToken(refreshToken, user.id, deviceFingerprint, ip);
 
-        return res.json(accessToken);
+        JwtTokenService.setCookieRefreshToken(res, refreshToken);
+
+        return res.json({ accessToken });
     }
     
     signup = async (req: Request, res: Response) => {
@@ -42,5 +42,38 @@ export default class LoginController {
 
         return res.status(200).end();
     }
+
+    updateTokens = async (req: Request, res: Response) => {
+        const oldRefreshToken: string = prop(JwtTokenService.COOKIE_REFRESH_TOKEN)(req.cookies);
+  
+        const dbRefreshToken = await this.jwtTokenService.findByToken(oldRefreshToken);
+
+        if (!dbRefreshToken) {
+            return res.status(400).json({ message: "User is not authorized" });
+        }
+
+        const decoded = JwtTokenService.decodeRefreshToken(dbRefreshToken.token);
+
+        const user = await this.loginService.findByLogin(decoded.login);
+
+        const accessToken = JwtTokenService.makeAccessToken(user);
+        const newRefreshToken = JwtTokenService.makeRefreshToken(decoded.login);
+
+        this.jwtTokenService.updateRefreshTokenById(dbRefreshToken.id, newRefreshToken);
+
+        JwtTokenService.setCookieRefreshToken(res, newRefreshToken);
+        
+        return res.status(200).json({ accessToken });;
+    }
+
+    deleteRefreshToken = async(req: Request, res: Response) => {
+        const refreshToken: string = prop(JwtTokenService.COOKIE_REFRESH_TOKEN)(req.cookies);
+
+        await this.jwtTokenService.deleteRefreshToken(refreshToken);
+
+        JwtTokenService.removeCookieRefreshToken(res);
+
+        return res.status(200).end();
+    } 
 }
 

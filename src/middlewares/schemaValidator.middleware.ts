@@ -1,5 +1,6 @@
 import type { ObjectSchema } from 'joi';
 import { NextFunction, Request, Response } from "express";
+import { prop } from 'ramda';
 
 
 const validateRequestMiddleware = (schema: ObjectSchema<any>) =>
@@ -7,7 +8,11 @@ const validateRequestMiddleware = (schema: ObjectSchema<any>) =>
       const options = {
         abortEarly: false,
       }
-      const { error } = schema.validate(req.body, options); 
+
+      const { error } = schema.validate(
+        prop('body')(req), 
+        options
+      ); 
 
       if (error) { 
         const { details } = error; 

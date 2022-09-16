@@ -70,4 +70,4 @@ Refresh:
   1) Verify Refresh token
   2) Compares passed refresh token with stored in db
   3) Decodes and extracts login from refresh token
-  4) Find user by login and makes Refresh, Access tokens by secret key with new exp time
+  4) Find user by login and makes Access tokens by secret key with new exp time

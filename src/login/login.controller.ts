@@ -43,7 +43,7 @@ export default class LoginController {
         return res.status(200).end();
     }
 
-    updateTokens = async (req: Request, res: Response) => {
+    updateAccessToken = async (req: Request, res: Response) => {
         const oldRefreshToken: string = prop(JwtTokenService.COOKIE_REFRESH_TOKEN)(req.cookies);
   
         const dbRefreshToken = await this.jwtTokenService.findByToken(oldRefreshToken);
@@ -57,12 +57,7 @@ export default class LoginController {
         const user = await this.loginService.findByLogin(decoded.login);
 
         const accessToken = JwtTokenService.makeAccessToken(user);
-        const newRefreshToken = JwtTokenService.makeRefreshToken(decoded.login);
 
-        this.jwtTokenService.updateRefreshTokenById(dbRefreshToken.id, newRefreshToken);
-
-        JwtTokenService.setCookieRefreshToken(res, newRefreshToken);
-        
         return res.status(200).json({ accessToken });;
     }
 

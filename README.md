@@ -44,7 +44,7 @@ JWT tokens working principles:
 
 A brief description of the logic:
 
-Signup: 
+POST:/signup: 
   User logins with (login, password).
     1) Identification.
         a) If exists throw error.
@@ -52,7 +52,7 @@ Signup:
             1) Hashing password by secret key.
             2) Create user in db.
 
-Sigin:
+POST:/sigin:
   User logins with (login, password, device fingerprint).
     1) Identification.
         a) If not exists throw error.
@@ -60,14 +60,21 @@ Sigin:
         a) Hashing password by secret key and comparing with password in db if no match throw error.
     3) Authorization.
         a) Creates access token (contains: user entity except password) returns as response.
-        b) Creates refresh token (contains: login) and sets to cookie and write it to the db.
+        b) Creates refresh token (UUID string) and sets to cookie and write it to the db.
             1) If not exists: creates new refresh token entity in db with userId relationship.
             2) If exists:
               When fingerprint same userId same: replaces current token in db with new.
               When fingerprint differs userId same: creates new entity in db for new device.
 
-Refresh:
+POST:/refreshTokens:
   1) Verify Refresh token
   2) Compares passed refresh token with stored in db
-  3) Decodes and extracts login from refresh token
-  4) Find user by login and makes Access tokens by secret key with new exp time
+  3) Decodes and extracts login from db refresh token
+  4) Find user by login and makes Refresh, Access tokens by secret key with new exp time
+
+GET:/refreshTokens:
+  1) return active refresh token sessions
+
+
+DELETE:/refreshTokens:
+  1) remove refresh token session

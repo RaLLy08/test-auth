@@ -4,20 +4,21 @@ import client from "../db/pg";
 class RefreshTokenModel {
     constructor() {
         client.query(`
-            CREATE TABLE IF NOT EXISTS "refresh-tokens" (
+            CREATE TABLE IF NOT EXISTS "refresh-token" (
                 id SERIAL PRIMARY KEY,
                 token VARCHAR(255) NOT NULL,
                 device_fingerprint VARCHAR(255) NOT NULL,
                 user_id INTEGER NOT NULL,
                 ip VARCHAR(255) NOT NULL,
-                FOREIGN KEY (user_id) REFERENCES users(id)
+                createdAt timestamp with time zone NOT NULL DEFAULT now(),
+                FOREIGN KEY (user_id) REFERENCES "user"(id)
             )
         `)
     }
 
     async create(userId: number, deviceFingerprint: string, token: string, ip: string): Promise<RefreshTokenInterface> {
         const query = {
-            text: 'INSERT INTO "refresh-tokens" (token, user_id, device_fingerprint, ip) VALUES ($1, $2, $3, $4) RETURNING *',
+            text: 'INSERT INTO "refresh-token" (token, user_id, device_fingerprint, ip) VALUES ($1, $2, $3, $4) RETURNING *',
             values: [token, userId, deviceFingerprint, ip],
         };
 
@@ -28,7 +29,7 @@ class RefreshTokenModel {
 
     async updateByUserId(userId: number, token: string): Promise<RefreshTokenInterface> {
         const query = {
-            text: `UPDATE "refresh-tokens" SET token = $1 WHERE user_id = $2 RETURNING *`,
+            text: `UPDATE "refresh-token" SET token = $1 WHERE user_id = $2 RETURNING *`,
             values: [token, userId],
         };
 
@@ -39,16 +40,16 @@ class RefreshTokenModel {
 
     async updateById(id: number, newRefreshToken: string) {
         const query = {
-            text: `UPDATE "refresh-tokens" SET token = $1 WHERE id = $2`,
+            text: `UPDATE "refresh-token" SET token = $1 WHERE id = $2`,
             values: [newRefreshToken, id],
         };
 
         await client.query(query);
     }
 
-    async getByUserId(userId: number): Promise<RefreshTokenInterface[]> {
+    async findByUserId(userId: number): Promise<RefreshTokenInterface[]> {
         const query = {
-            text: `SELECT * FROM "refresh-tokens" WHERE user_id = $1`,
+            text: `SELECT * FROM "refresh-token" WHERE user_id = $1`,
             values: [userId],
         };
 
@@ -57,10 +58,10 @@ class RefreshTokenModel {
         return rows;
     }
 
-    async updateByUserDeviceFingerprint(userId: number, fingerprint: string, token: string): Promise<RefreshTokenInterface> {
+    async updateByUserIpFingerprint(userId: number, fingerprint: string, token: string, ip: string): Promise<RefreshTokenInterface> {
         const query = {
-            text: `UPDATE "refresh-tokens" SET token = $1 where ("user_id"=$2 and "device_fingerprint"=$3) RETURNING *`,
-            values: [token, userId, fingerprint],
+            text: `UPDATE "refresh-token" SET token = $1 where ("user_id"=$2 and "device_fingerprint"=$3 and "ip"=$4) RETURNING *`,
+            values: [token, userId, fingerprint, ip],
         };
 
         const {rows: [row]} = await client.query(query);
@@ -68,10 +69,21 @@ class RefreshTokenModel {
         return row;
     }
     
-    async getUserDeviceFingerprint(userId: number, fingerprint: string): Promise<RefreshTokenInterface> {
+    async findByUserIpFingerprint(userId: number, fingerprint: string, ip: string): Promise<RefreshTokenInterface> {
         const query = {
-            text: `SELECT * from "refresh-tokens" where ("user_id"=$1 and "device_fingerprint"=$2)`,
-            values: [userId, fingerprint],
+            text: `SELECT * from "refresh-token" where ("user_id"=$1 and "device_fingerprint"=$2 and "ip"=$3)`,
+            values: [userId, fingerprint, ip],
+        };
+
+        const { rows: [row]} = await client.query(query);
+
+        return row;
+    }
+
+    async findByTokenIpFingerprint(token: string, fingerprint: string, ip: string): Promise<RefreshTokenInterface> {
+        const query = {
+            text: `SELECT * from "refresh-token" where ("token"=$1 and "device_fingerprint"=$2 and "ip"=$3)`,
+            values: [token, fingerprint, ip],
         };
 
         const { rows: [row]} = await client.query(query);
@@ -81,7 +93,7 @@ class RefreshTokenModel {
 
     async findByToken(token: string): Promise<RefreshTokenInterface> {
         const query = {
-            text: `SELECT * FROM "refresh-tokens" WHERE token = $1`,
+            text: `SELECT * FROM "refresh-token" WHERE token = $1`,
             values: [token],
         };
 
@@ -92,7 +104,7 @@ class RefreshTokenModel {
 
     async delete(token: string) {
         const query = {
-            text: `DELETE FROM "refresh-tokens" WHERE token = $1`,
+            text: `DELETE FROM "refresh-token" WHERE token = $1`,
             values: [token],
         };
 

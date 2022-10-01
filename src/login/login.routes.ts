@@ -1,16 +1,17 @@
 import { Router } from "express";
 
 import LoginController from "./login.controller";
-import { signinSchema, signupSchema } from './login.validationSchema';
+import { signinSchema, signupSchema, refreshTokensSchema } from './login.validationSchema';
 import validateRequestMiddleware from '../middlewares/schemaValidator.middleware';
-import { accessTokenMiddleware, refreshTokenMiddleware } from "../auth/jwt-validate.middleware";
+import { accessTokenMiddleware } from "../auth/jwt-validate.middleware";
 
-const { signin, signup, updateAccessToken, deleteRefreshToken } = new LoginController();
+const { signin, signup, refreshTokens, deleteRefreshToken, getRefreshTokens } = new LoginController();
 
 
 export default (router: Router) => {
     router.post("/signin", validateRequestMiddleware(signinSchema), signin);
     router.post("/signup", validateRequestMiddleware(signupSchema), signup);
-    router.post("/refreshToken", refreshTokenMiddleware(), updateAccessToken);
-    router.delete("/refreshToken", refreshTokenMiddleware(), deleteRefreshToken);
+    router.post("/refreshTokens", validateRequestMiddleware(refreshTokensSchema), refreshTokens);
+    router.delete("/refreshTokens", deleteRefreshToken);
+    router.get("/refreshTokens", accessTokenMiddleware(), getRefreshTokens);
 }

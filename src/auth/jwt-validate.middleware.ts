@@ -19,6 +19,7 @@ export const accessTokenMiddleware = () =>
 
         try {
             verify(token, process.env.JWT_SECRET!);
+            req.accessDecoded = JwtTokenService.decodeAccessToken(token);
 
             next();
         } catch (error: any) {
@@ -29,26 +30,3 @@ export const accessTokenMiddleware = () =>
             return res.status(403).json({message: "User is not authorized", error});
         }
     };
-
-
-export const refreshTokenMiddleware = () =>
-    (req: Request, res: Response, next: NextFunction) => {
-        if (req.method === "OPTIONS") next();
-
-        const refreshToken: string = prop(JwtTokenService.COOKIE_REFRESH_TOKEN)(req.cookies);
-
-        try {
-            verify(refreshToken, process.env.JWT_SECRET!);
-
-            next();
-        } catch (error: any) {
-            if (error.name === "TokenExpiredError") {
-                return res.status(403).json({message: "Token is expired", error});
-            }
-
-            return res.status(400).json({message: "User is not authorized", error});
-        }
-        
-    };
-
-

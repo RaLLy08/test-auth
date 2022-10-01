@@ -4,9 +4,10 @@ import { User } from "../interfaces/user.interface";
 class UserModel {
     constructor() {
         client.query(`
-            CREATE TABLE IF NOT EXISTS users (
+            CREATE TABLE IF NOT EXISTS "user" (
                 id SERIAL PRIMARY KEY,
                 login VARCHAR(255) NOT NULL,
+                createdAt timestamp with time zone NOT NULL DEFAULT now(),
                 password VARCHAR(255) NOT NULL
             )
         `)
@@ -14,7 +15,7 @@ class UserModel {
 
     async create(login: string, password: string): Promise<User> {
         const query = {
-            text: 'INSERT INTO users (login, password) VALUES ($1, $2) RETURNING *',
+            text: 'INSERT INTO "user" (login, password) VALUES ($1, $2) RETURNING *',
             values: [login, password],
         };
 
@@ -23,18 +24,19 @@ class UserModel {
         return row;
     }
 
-    async findById(id: string): Promise<User> {
+    async findById(id: number): Promise<User> {
         const query = {
-            text: `SELECT * FROM users WHERE id = $1`,
+            text: `SELECT * FROM "user" WHERE id = $1`,
             values: [id],
         };
+        const {rows: [row]} = await client.query(query);
 
-        return client.query(query);
+        return row;
     }
 
     async findByLogin(login: string): Promise<User> {
         const query = {
-            text: `SELECT * FROM users WHERE login = $1`,
+            text: `SELECT * FROM "user" WHERE login = $1`,
             values: [login],
         };
 

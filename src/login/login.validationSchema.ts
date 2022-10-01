@@ -1,7 +1,5 @@
 import Joi from "joi";
 
-import JwtTokenService from "../auth/jwt-token.service";
-
 export const signupSchema = Joi.object({
     login: Joi.string()
         .alphanum()
@@ -20,5 +18,9 @@ export const signinSchema = Joi.object({
         .required(),
     password: Joi.string()
         .required().min(6),
+    deviceFingerprint: Joi.string().required()
+});
+
+export const refreshTokensSchema = Joi.object({
     deviceFingerprint: Joi.string().required()
 });

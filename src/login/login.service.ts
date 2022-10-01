@@ -10,4 +10,7 @@ export default class LoginService {
         return await userModel.findByLogin(login);
     }
 
+    async findById(id: number) {
+        return await userModel.findById(id);
+    }
 }

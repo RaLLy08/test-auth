@@ -1,6 +1,34 @@
-docker build . -t [image name]
+for running: docker-compose -d --env-file .env up --build
+for stopping: docker-compose down
 
-docker run -p [inside port]:[outside port] -d --name [new container name] [image name]
+* managing container
+
+docker ps -a [show all running containers]
+docker container prune - remove all containers
+
+
+* running container
+docker run \
+        -i (interactive) \
+        -t(terminal) [name]  - connect to terminal of container;
+        [-d: detach] \
+        [--rm: aftoremove after exit!] \
+* running container with mapped port
+
+docker run [-p: port publishing] [outside port]:[container port] -d --name [new container name] [image name]
+example : docker run -d -p 8080:80 nginx
+
+
+* mappings volumes (paths, files)
+docker run -v ${PWD}:/usr/share/nginx/html nginx
+exaple: docker run -d --name my_nginx -p 8080:80 -v ${pwd}:/usr/share/nginx/html --rm nginx
+
+
+* managing with auto compose
+        docker-compose up
+        docker-compose down
+        docker-compose up -d --build
+
 
 JWT tokens working principles:
 

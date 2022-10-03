@@ -1,12 +1,37 @@
 version: "3.8"
 services:
-  auth-test:
+  node-auth-server:
     build: .
-    ports:
-      - "7060:7060"
-    volumes:
-      - ./:/app
-      - /app/node_modules
+    depends_on:
+      - db
     env_file:
-      - ./.env
-    
+      - .env
+    # ports:
+    #   - "7060:7060"
+    # volumes:
+    #   - ./:/app
+    #   - /app/node_modules
+    # env_file:
+    #   - ./.env
+  db:
+    image: postgres:14
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_USER_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    # volumes:
+    #   # When the PostgresSQL container is started it will run any scripts
+    #   # provided in the `docker-entrypoint-initdb.d` directory, this connects
+    #   # our seed file to that directory so that it gets run
+    #   - ./database-seed.sql:/docker-entrypoint-initdb.d/database-seed.sql
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "test@example.com"
+      PGADMIN_DEFAULT_PASSWORD: "123321"
+    ports:
+      - "16543:80"
+    depends_on:
+      - db

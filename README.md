@@ -1,4 +1,4 @@
-for running: docker-compose -d --env-file .env up --build
+for running: docker-compose --env-file .env up --build
 for stopping: docker-compose down
 
 * managing container
@@ -21,11 +21,11 @@ example : docker run -d -p 8080:80 nginx
 
 * mappings volumes (paths, files)
 docker run -v ${PWD}:/usr/share/nginx/html nginx
-exaple: docker run -d --name my_nginx -p 8080:80 -v ${pwd}:/usr/share/nginx/html --rm nginx
+example: docker run -d --name my_nginx -p 8080:80 -v ${pwd}:/usr/share/nginx/html --rm nginx
 
 
 * managing with auto compose
-        docker-compose up
+        docker-compose --env-file .env up 
         docker-compose down
         docker-compose up -d --build
 

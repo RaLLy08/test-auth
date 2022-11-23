@@ -1,4 +1,4 @@
-import { Router } from "express";
+import type { Router } from "express";
 
 import LoginController from "./login.controller";
 import { signinSchema, signupSchema, refreshTokensSchema } from './login.validationSchema';

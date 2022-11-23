@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { verify } from "jsonwebtoken";
-import { pathOr, split, prop } from "ramda";
+import { pathOr, split } from "ramda";
 import JwtTokenService from "./jwt-token.service";
 
 

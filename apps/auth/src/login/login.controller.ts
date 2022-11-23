@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { prop } from 'ramda';
 import { randomUUID } from "crypto";
 

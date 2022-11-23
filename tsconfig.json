@@ -10,8 +10,9 @@
     "esModuleInterop": true,
     "removeComments": true,
     "types": [
-      "node"
-    ]
+      "node",
+      "amqplib",
+    ],
+    "typeRoots": [ "node_modules/@types" ],
   },
-  "include": ["src"]
 }

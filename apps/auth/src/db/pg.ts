@@ -1,5 +1,4 @@
 const { Client } = require('pg');
-import 'dotenv/config';
 
 const client = new Client({
     password: process.env.DB_USER_PASSWORD,

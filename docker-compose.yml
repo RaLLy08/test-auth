@@ -1,19 +1,30 @@
 version: "3.8"
 services:
   node-auth-server:
-    build: .
+    build:
+      context: .
+      dockerfile: ./apps/auth/Dockerfile
     depends_on:
       - db
     env_file:
       - .env
-    # ports:
-    #   - "7060:7060"
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+          
     # volumes:
     #   - ./:/app
     #   - /app/node_modules
     # env_file:
     #   - ./.env
+
+  node-resource-server:
+    build:
+      context: .
+      dockerfile: ./apps/resource/Dockerfile
+    ports:
+      - 7071:7071
   db:
+    restart: always
     image: postgres:14
     ports:
       - "5432:5432"
@@ -35,3 +46,13 @@ services:
       - "16543:80"
     depends_on:
       - db
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+      

@@ -1,38 +1,73 @@
 import amqp from 'amqplib'
 
-const queue = 'auth';
 
 class RmqQueue {
     private channel: amqp.Channel | null = null;
+    queue: string;
 
-    public async startAuthQueue() {
-        const connection = await amqp.connect('amqp://guest:guest@rabbitmq')
+    constructor(queue: string) {
+        this.queue = queue;
+    }
 
-        this.channel = await connection.createChannel()
-        await this.channel.assertQueue(queue)
+    async startAuthQueue() {
+        const host = process.env.RABBITMQ_HOST || 'localhost';
+
+        const connection 
+            = await amqp.connect(
+                `amqp://${process.env.RABBITMQ_DEFAULT_USER}:${process.env.RABBITMQ_DEFAULT_PASS}@${host}`
+            );
+
+        this.channel = await connection.createChannel();
+        await this.channel.assertQueue(this.queue);
+        console.log('Queue started');
 
         return this.channel;
     }
 
-    public rmqSend(str: string) {
+    send(str: string, messageId: string) {
+        const options = {
+            messageId,
+        }
+
         if (this.channel) {
-            this.channel.sendToQueue(queue, Buffer.from(str))
+            this.channel.sendToQueue(this.queue, Buffer.from(str), options);
         } else {
-            console.log('Channel not ready')
+            console.log('Channel not ready');
         }
     }
 
-    public rmqConsume(cb: (msg: amqp.ConsumeMessage | null) => void) {
+    // consume(cb: (msg: amqp.ConsumeMessage | null) => void) {
+    //     if (this.channel) {
+    //         this.channel.consume(this.queue, msg => {
+    //             cb(msg);
+    //         })
+    //     } else {
+    //         console.log('Channel not ready');
+    //     }
+    // }
+
+    ack(msg: amqp.Message) {
         if (this.channel) {
-            this.channel.consume(queue, msg => {
-                cb(msg)
-            })
+            this.channel.ack(msg);
         } else {
-            console.log('Channel not ready')
+            console.log('Channel not ready');
         }
     }
+
+    // get(cb: (msg: amqp.GetMessage | null) => void, id: string) {
+    //     if (this.channel) {
+    //         this.channel.get(this.queue, { noAck: true })
+    //     } else {
+    //         console.log('Channel not ready');
+    //     }
+    // }
+
+    createPayload(payload: any) {
+        return JSON.stringify(payload);
+    }
+
 }
 
 
 
-export default new RmqQueue();
+export default new RmqQueue('auth');

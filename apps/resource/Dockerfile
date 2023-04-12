@@ -14,4 +14,8 @@ COPY . .
 
 # EXPOSE 7060
 
-CMD [ "npm", "run", "start:resource" ]
+RUN npm run build:resource
+
+# RUN rm -rf apps
+
+CMD [ "node", "dist/resource/src" ]

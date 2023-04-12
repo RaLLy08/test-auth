@@ -1,12 +1,12 @@
+if (process.platform === "win32") {
+    require("dotenv/config")
+}
 import express from "express";
 import amqp from 'amqplib'
 import router from "./router";
 import bodyParser from "body-parser";
 const cookieParser = require("cookie-parser");
 
-if (process.platform === "win32") {
-    require("dotenv/config")
-}
 
 const app = express();
 const queue = 'auth';

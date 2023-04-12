@@ -17,14 +17,14 @@ export function authMiddleware() {
             return res.status(403).json({message: "Token not provided"});
         }
 
-        rmq.rmqSend(token);
+        rmq.send(token);
 
         const resp = await new Promise((resolve, reject) => {
-            rmq.rmqConsume((msg) => {
+            rmq.consume((msg) => {
                 // if (msg === token)
-
+                console.log('123')
                 resolve(msg);
-            })
+            });
         });
 
         

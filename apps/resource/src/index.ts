@@ -1,6 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 const cookieParser = require("cookie-parser");
+import morgan from "morgan";
 
 import router from "./router";
 import rmq from "./rmq";
@@ -11,10 +12,10 @@ if (process.platform === "win32") {
 
 const app = express();
 
-app.use(bodyParser.json())
-app.use(cookieParser())
+app.use(morgan('combined'));
+app.use(bodyParser.json());
+app.use(cookieParser());
 app.use("/api/", router());
-
 
 const bootstrap = async () => {
     await rmq.startAuthQueue();

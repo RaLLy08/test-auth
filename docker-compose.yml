@@ -5,11 +5,12 @@ services:
       context: .
       dockerfile: ./apps/auth/Dockerfile
     depends_on:
-      - db
+      - auth-db-pg
+      - rabbitmq
     env_file:
-      - .env
+      - ./apps/auth/.env
     ports:
-      - "${SERVER_PORT}:${SERVER_PORT}"
+      - "7060:7060"
           
     # volumes:
     #   - ./:/app
@@ -23,15 +24,26 @@ services:
       dockerfile: ./apps/resource/Dockerfile
     ports:
       - 7071:7071
-  db:
+    depends_on:
+      - rabbitmq
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+  auth-db-pg:
     restart: always
     image: postgres:14
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_USER_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=authuser
+      - POSTGRES_PASSWORD=123
+      - POSTGRES_DB=test-auth
     # volumes:
     #   # When the PostgresSQL container is started it will run any scripts
     #   # provided in the `docker-entrypoint-initdb.d` directory, this connects
@@ -45,7 +57,7 @@ services:
     ports:
       - "16543:80"
     depends_on:
-      - db
+      - auth-db-pg
 
   rabbitmq:
     image: rabbitmq:3-management
